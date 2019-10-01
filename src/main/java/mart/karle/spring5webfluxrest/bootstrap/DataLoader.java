@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import mart.karle.spring5webfluxrest.domain.Category;
 import mart.karle.spring5webfluxrest.domain.Vendor;
-import mart.karle.spring5webfluxrest.repository.CategoryRepository;
-import mart.karle.spring5webfluxrest.repository.VendorRepository;
+import mart.karle.spring5webfluxrest.repositories.CategoryRepository;
+import mart.karle.spring5webfluxrest.repositories.VendorRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
