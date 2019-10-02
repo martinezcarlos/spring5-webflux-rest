@@ -54,7 +54,7 @@ class CategoryControllerTest {
   void createCategory() {
     // Given
     BDDMockito.given(categoryRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Category.builder().build()));
-    final Mono<Category> catToSaveMono = Mono.just(Category.builder().id("someid").description("Cat 1").build());
+    final Mono<Category> catToSaveMono = Mono.just(Category.builder().description("Cat 1").build());
     // When
     // Then
     webTestClient.post().uri(CategoryController.BASE_PATH).body(catToSaveMono, Category.class).exchange().expectStatus().isCreated();
