@@ -5,7 +5,6 @@ import mart.karle.spring5webfluxrest.repositories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +15,10 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
@@ -34,7 +37,7 @@ class CategoryControllerTest {
   @Test
   void listCategories() {
     // Given
-    BDDMockito.given(categoryRepository.findAll()).willReturn(Flux.just(Category.builder().description("Cat 1").build(),
+    given(categoryRepository.findAll()).willReturn(Flux.just(Category.builder().description("Cat 1").build(),
         Category.builder().description("Cat 2").build()));
     // When
     // Then
@@ -44,7 +47,7 @@ class CategoryControllerTest {
   @Test
   void getById() {
     // Given
-    BDDMockito.given(categoryRepository.findById(anyString())).willReturn(Mono.just(Category.builder().id("someid").description("Cat 1").build()));
+    given(categoryRepository.findById(anyString())).willReturn(Mono.just(Category.builder().id("someid").description("Cat 1").build()));
     // When
     // Then
     webTestClient.get().uri(CategoryController.BASE_PATH + "/someid").exchange().expectBody(Category.class);
@@ -53,7 +56,7 @@ class CategoryControllerTest {
   @Test
   void createCategory() {
     // Given
-    BDDMockito.given(categoryRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Category.builder().build()));
+    given(categoryRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Category.builder().build()));
     final Mono<Category> catToSaveMono = Mono.just(Category.builder().description("Cat 1").build());
     // When
     // Then
@@ -63,10 +66,37 @@ class CategoryControllerTest {
   @Test
   void updateCategory() {
     // Given
-    BDDMockito.given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(Category.builder().build()));
+    given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(Category.builder().build()));
     final Mono<Category> catToUpdateMono = Mono.just(Category.builder().id("someid").description("Cat 1").build());
     // When
     // Then
     webTestClient.put().uri(CategoryController.BASE_PATH + "/newid").body(catToUpdateMono, Category.class).exchange().expectStatus().isOk();
+  }
+
+  @Test
+  void patchCategoryChanges() {
+    // Given
+    final Category catToUpdate = Category.builder().id("someid").description("Cat 1").build();
+    final Category inputCat = Category.builder().description("Cat 2").build();
+    given(categoryRepository.findById(eq("someid"))).willReturn(Mono.just(catToUpdate));
+    final Mono<Category> inputCatMono = Mono.just(inputCat);
+    given(categoryRepository.save(any(Category.class))).willReturn(inputCatMono);
+    // When
+    // Then
+    webTestClient.patch().uri(CategoryController.BASE_PATH + "/someid").body(inputCatMono, Category.class).exchange().expectStatus().isOk();
+    then(categoryRepository).should().save(any(Category.class));
+  }
+
+  @Test
+  void patchCategoryNoChanges() {
+    // Given
+    final Category catToUpdate = Category.builder().id("someid").description("Cat 1").build();
+    final Category inputCat = Category.builder().build();
+    given(categoryRepository.findById(eq("someid"))).willReturn(Mono.just(catToUpdate));
+    final Mono<Category> inputCatMono = Mono.just(inputCat);
+    // When
+    // Then
+    webTestClient.patch().uri(CategoryController.BASE_PATH + "/someid").body(inputCatMono, Category.class).exchange().expectStatus().isOk();
+    then(categoryRepository).should(never()).save(any(Category.class));
   }
 }

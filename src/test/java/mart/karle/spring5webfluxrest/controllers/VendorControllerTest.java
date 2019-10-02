@@ -5,7 +5,6 @@ import mart.karle.spring5webfluxrest.repositories.VendorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class VendorControllerTest {
@@ -35,7 +35,7 @@ class VendorControllerTest {
   @Test
   void listVendors() {
     // Given
-    BDDMockito.given(vendorRepository.findAll()).willReturn(Flux.just(Vendor.builder().firstName("Name 1").lastName("LastName 1").build(),
+    given(vendorRepository.findAll()).willReturn(Flux.just(Vendor.builder().firstName("Name 1").lastName("LastName 1").build(),
         Vendor.builder().firstName("Name 2").lastName("LastName 2").build()));
     // When
     // Then
@@ -45,7 +45,7 @@ class VendorControllerTest {
   @Test
   void getVendorById() {
     // Given
-    BDDMockito.given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().firstName("Name 1").lastName("LastName 1").build()));
+    given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().firstName("Name 1").lastName("LastName 1").build()));
     // When
     // Then
     webTestClient.get().uri(VendorController.BASE_PATH + "/someid").exchange().expectBody(Vendor.class);
@@ -54,7 +54,7 @@ class VendorControllerTest {
   @Test
   void createVendor() {
     // Given
-    BDDMockito.given(vendorRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Vendor.builder().build()));
+    given(vendorRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Vendor.builder().build()));
     final Mono<Vendor> venToSaveMono = Mono.just(Vendor.builder().firstName("Name 1").build());
     // When
     // Then
@@ -64,7 +64,7 @@ class VendorControllerTest {
   @Test
   void updateVendor() {
     // Given
-    BDDMockito.given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+    given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
     final Mono<Vendor> venToUpdateMono = Mono.just(Vendor.builder().id("someid").firstName("Name 1").build());
     // When
     // Then
